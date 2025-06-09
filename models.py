@@ -17,9 +17,8 @@ class CaseRecord:
     case_detail: str
     problem_start: str  # or datetime
     location: str
-    urgency: int
-    scoring: Dict  # specify types if needed e.g., Dict[str, int]
-    category: str
+    priority: int
+    score: int  # specify types if needed e.g., Dict[str, int]
     thread: List[Grievance] = field(default_factory=list)
 
 
@@ -28,22 +27,21 @@ class Category:
     priority: int
 
 
-case = CaseRecord(
-    case_no="asdfgh",
-    case_category="",
-    case_detail="Power outage",
-    problem_start="date of last night",
-    location="Lucknow, UP",
-    urgency=0,
-    scoring={},
-    category="Fire",
-    thread=[
-        Grievance(
-            caller_name="Diff name",
-            caller_phone_no=9876543210,
-            description="My building has no power",
-            location="Lucknow",
-            date_time="2025-06-09 12:00",
-        )
-    ],
-)
+# case = CaseRecord(
+#     case_no="asdfgh",
+#     case_category="",
+#     case_detail="Power outage",
+#     problem_start="date of last night",
+#     location="Lucknow, UP",
+#     urgency=0,
+#     scoring={},
+#     thread=[
+#         Grievance(
+#             caller_name="Diff name",
+#             caller_phone_no=9876543210,
+#             description="My building has no power",
+#             location="Lucknow",
+#             date_time="2025-06-09 12:00",
+#         )
+#     ],
+# )
