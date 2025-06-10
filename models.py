@@ -3,6 +3,7 @@ from typing import List, Dict
 from dataclasses import dataclass, field
 
 
+@dataclass
 class Grievance:
     caller_name: str
     caller_phone_no: str
@@ -11,6 +12,7 @@ class Grievance:
     date_time: datetime
 
 
+@dataclass
 class CaseRecord:
     case_no: str
     case_category: str
