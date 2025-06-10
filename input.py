@@ -3,10 +3,11 @@ from datetime import datetime
 import json
 import google.generativeai as genai
 import pyttsx3
+import os
 
 from models import Grievance
 
-genai.configure(api_key="AIzaSyBGFDpAwk9HlHaxffZEXazvrZO3msuNMGM")
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 def extract_incident_details(text):

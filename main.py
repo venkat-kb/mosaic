@@ -5,8 +5,8 @@ from spam_filtering import HelplineProcessor
 
 def main():
     try:
-        # agent = GrievanceAgent()
-        # grievance = agent.run_conversation()
+        agent = GrievanceAgent()
+        grievance = agent.run_conversation()
 
         # print(grievance)
 
