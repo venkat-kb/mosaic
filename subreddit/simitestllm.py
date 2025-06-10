@@ -15,20 +15,22 @@ from ibm_watsonx_ai.foundation_models.utils.enums import ModelTypes
 from ibm_watsonx_ai import *  #IAMTokenManager
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from sentence_transformers import SentenceTransformer
+import spacy
+from components.models import CaseRecord
 
 # ------------- CONFIGURATION ----------------
-IBM_API_KEY = "" #put ur own in 
-IBM_PROJECT_ID = "" #put ur own in 
+IBM_API_KEY = "X-ZOoWK-P_FUNQtpoRr_7Q27_erBBnYfjYDj-LLpDF7t" #put ur own in 
+IBM_PROJECT_ID = "9af6f191-234c-49b5-adaf-bdd314dbd589" #put ur own in 
 IBM_REGION = "us-south"  # or your region
-
+EXISTING_JSON = r"C:\Users\venka\Downloads\mosaic\data\test.json"
 SIMILARITY_THRESHOLD = 0.2
 DATE_WINDOW = timedelta(days=2)
 LLM_WEIGHT = 0.4
 TFIDF_WEIGHT = 0.6
 
-RAW_INPUT = r"C:\Users\venka\Downloads\mosaic\experimentaldata\sample_grievances.json"
-OUTPUT_DIR = r"C:\Users\venka\Downloads\mosaic\sampleoutputs"
-OUTPUT_FILE = "grouped_threads_watsonx.json"
+# RAW_INPUT = r"C:\Users\venka\Downloads\mosaic\experimentaldata\sample_grievances.json"
+# OUTPUT_DIR = r"C:\Users\venka\Downloads\mosaic\sampleoutputs"
+# OUTPUT_FILE = "grouped_threads_watsonx.json"
 
 # ------------- IBM Watsonx Setup ----------------
 # token_manager = IAMTokenManager(api_key=IBM_API_KEY, url=f"https://iam.cloud.ibm.com/identity/token")
@@ -79,84 +81,143 @@ def get_sentiment(text):
     else:
         return "Neutral"
 
-# ---------- Load and Parse ----------------
-with open(RAW_INPUT, 'r', encoding='utf-8') as f:
-    grievances = json.load(f)
+def subredditting(g):
+    # ---------- Load and Parse ----------------
+    with open(EXISTING_JSON, 'r', encoding='utf-8') as f:
+        existing_cases = json.load(f)
+    # with open(RAW_INPUT, 'r', encoding='utf-8') as f:
+    #     grievances = json.load(f)
 
-for g in grievances:
-    g['date_time'] = datetime.fromisoformat(g['date_time'])
+    # for g in grievances:
+    g.date_time = datetime.fromisoformat(g.date_time)
 
-descriptions = [g['description'] for g in grievances]
+    # descriptions = [g['description'] for g in grievances]
+    descriptions = g.description
 
-# TF-IDF similarity
-vectorizer = TfidfVectorizer()
-tfidf_matrix = vectorizer.fit_transform(descriptions)
-tfidf_similarity = cosine_similarity(tfidf_matrix)
+    # TF-IDF similarity
+    # vectorizer = TfidfVectorizer()
+    # tfidf_matrix = vectorizer.fit_transform(descriptions)
+    # tfidf_similarity = cosine_similarity(tfidf_matrix)
 
-# LLM Embeddings
-print("Fetching embeddings from HuggingFace since we tried watsonx but ibm's embedding-001 is not supported for this environment...")
-embeddings = [get_local_embedding(desc) for desc in descriptions]
-print("Embeddings complete.")
+    # LLM Embeddings
+    print("Fetching embeddings from HuggingFace since we tried watsonx but ibm's embedding-001 is not supported for this environment...")
+    embeddings = [get_local_embedding(descriptions)]
+    print("Embeddings complete.")
 
-# ---------- Grouping Threads ---------------
-visited = [False] * len(grievances)
-threads = []
+    # ---------- Grouping Threads ---------------
+    visited = [False] * len(existing_cases)
+    threads = []
+    best_case_idx = -1
+    best_score=-1
 
-for i in range(len(grievances)):
-    if visited[i]:
-        continue
-
-    base = grievances[i]
-    base_embed = embeddings[i]
-    thread_items = [base]
-    visited[i] = True
-
-    for j in range(i + 1, len(grievances)):
-        if visited[j]:
+    for idx, case in enumerate(existing_cases):
+        if visited[idx]:
             continue
-        g = grievances[j]
-        if base['location'].lower() != g['location'].lower():
+        if case["location"].lower() != g.location.lower():
             continue
-        if abs((base['date_time'] - g['date_time']).days) > DATE_WINDOW.days:
+        try:
+            case_date = datetime.fromisoformat(case["problem_start"])
+        except ValueError:
+            case_date = datetime.strptime(case["problem_start"], "%Y-%m-%d %H:%M:%S")
+
+        if abs((g.date_time - case_date).days) > DATE_WINDOW.days:
             continue
 
-        tfidf_score = tfidf_similarity[i][j]
-        llm_score = cosine_sim(base_embed, embeddings[j])
+        tfidf = TfidfVectorizer()
+        texts = [case["case_detail"], descriptions]
+        tfidf_matrix = tfidf.fit_transform(texts)
+        tfidf_score = cosine_similarity(tfidf_matrix)[0][1]
+
+        case_embed = get_local_embedding(case["case_detail"])
+        llm_score = cosine_sim(embeddings, case_embed)
+
         final_score = (TFIDF_WEIGHT * tfidf_score + LLM_WEIGHT * llm_score) / (TFIDF_WEIGHT + LLM_WEIGHT)
 
-        if final_score >= SIMILARITY_THRESHOLD:
-            thread_items.append(g)
-            visited[j] = True
+        if final_score > best_score and final_score >= SIMILARITY_THRESHOLD:
+            best_score = final_score
+            best_case_idx = idx
 
-    sentiment_result = get_sentiment(thread_items[0]['description'])
-
-    # Build final thread
-    case = {
-        "case_no": str(uuid.uuid4()),
-        "case_category": "General Grievance",
-        "case_detail": thread_items[0]['description'],
-        "problem_start": thread_items[0]['date_time'].isoformat(),
-        "location": thread_items[0]['location'],
-        "urgency": 1,
-        "scoring": len(thread_items),
-        "sentiment": sentiment_result,
-        "thread": [
-            {
-                "caller_name": g["caller_name"],
-                "caller_phone_no": g["caller_phone_no"],
-                "description": g["description"],
-                "location": g["location"],
-                "date_time": g["date_time"].isoformat()
-            }
-            for g in thread_items
-        ]
+    new_thread_entry = {
+    "caller_name": g.caller_name,
+    "caller_phone_no": g.caller_phone_no,
+    "description": g.description,
+    "location": g.location,
+    "date_time": g.date_time.isoformat()
     }
+    if best_case_idx != -1:
+        existing_cases[best_case_idx]["thread"].append(new_thread_entry)
+    else:
+        case = {
+            
+                "case_no": str(uuid.uuid4()),
+                "case_category": "",
+                "case_detail": descriptions,
+                "problem_start": g.date_time.isoformat(),
+                "location": g.location.lower(),
+                "priority": "",
+                "score": 0,
+                "status": "open",
+                "thread": [new_thread_entry
+                ]
+            
+        }
+        existing_cases.append(case)
+    with open(EXISTING_JSON, "w") as f:
+        json.dump(existing_cases, f)
+            
 
-    threads.append(case)
 
-# ---------- Save and Move Output ----------------
-with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-    json.dump(threads, f, indent=2, ensure_ascii=False)
+        # base = grievances[i]
+        # base_embed = embeddings[i]
+        # thread_items = [base]
+        # visited[i] = True
 
-print(f"Thread grouping complete. Output saved to {OUTPUT_FILE}")
-move_file_to_directory(OUTPUT_FILE, OUTPUT_DIR)
+        # for j in range(idx + 1, len(grievances)):
+        #     if visited[j]:
+        #         continue
+        #     g = grievances[j]
+        #     if base['location'].lower() != g['location'].lower():
+        #         continue
+        #     if abs((base['date_time'] - g['date_time']).days) > DATE_WINDOW.days:
+        #         continue
+
+        #     tfidf_score = tfidf_similarity[i][j]
+        #     llm_score = cosine_sim(base_embed, embeddings[j])
+        #     final_score = (TFIDF_WEIGHT * tfidf_score + LLM_WEIGHT * llm_score) / (TFIDF_WEIGHT + LLM_WEIGHT)
+
+        #     if final_score >= SIMILARITY_THRESHOLD:
+        #         thread_items.append(g)
+        #         visited[j] = True
+
+        # sentiment_result = get_sentiment(thread_items[0]['description'])
+
+        # Build final thread
+        # case = {
+        #     "case_no": str(uuid.uuid4()),
+        #     "case_category": "General Grievance",
+        #     "case_detail": thread_items[0]['description'],
+        #     "problem_start": thread_items[0]['date_time'].isoformat(),
+        #     "location": thread_items[0]['location'],
+        #     "urgency": 1,
+        #     "scoring": len(thread_items),
+        #     "sentiment": sentiment_result,
+        #     "thread": [
+        #         {
+        #             "caller_name": g["caller_name"],
+        #             "caller_phone_no": g["caller_phone_no"],
+        #             "description": g["description"],
+        #             "location": g["location"],
+        #             "date_time": g["date_time"].isoformat()
+        #         }
+        #         for g in thread_items
+        #     ]
+        # }
+
+        # threads.append(case)
+
+    # # ---------- Save and Move Output ----------------
+    # with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+    #     json.dump(threads, f, indent=2, ensure_ascii=False)
+
+# print(f"Thread grouping complete. Output saved to {OUTPUT_FILE}")
+# move_file_to_directory(OUTPUT_FILE, OUTPUT_DIR)

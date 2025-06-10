@@ -552,5 +552,31 @@
         "date_time": "2023-06-17T11:45:00"
       }
     ]
+  },
+  {
+    "case_no": "c90f6406-a3bc-411c-9d8f-d69ebf2f0bfa",
+    "case_category": "",
+    "case_detail": "I have no water in my house",
+    "problem_start": "2025-06-10T16:14:40",
+    "location": "noida",
+    "priority": "",
+    "score": 0,
+    "status": "open",
+    "thread": [
+      {
+        "caller_name": "Aryan",
+        "caller_phone_no": "9582707063",
+        "description": "I have no water in my house",
+        "location": "Noida",
+        "date_time": "2025-06-10T16:14:40"
+      },
+      {
+        "caller_name": "Aryam",
+        "caller_phone_no": "9582707063",
+        "description": "I have little water in my house",
+        "location": "Noida",
+        "date_time": "2025-06-10T16:14:40"
+      }
+    ]
   }
 ]
