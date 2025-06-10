@@ -27,7 +27,6 @@ def main():
             # Thread mapping
 
             # Scoring
-
             case = CaseRecord(
                 {
                     "case_no": "CASE-001",
@@ -93,7 +92,6 @@ def main():
             )
 
             alpha = 0.5
-
             classify_case_priority_flexible(case, alpha)
 
             # Deparment go go
