@@ -4,6 +4,8 @@ import json
 from datetime import datetime
 import os
 
+path = os.getcwd()
+
 
 class GrievanceManagementGUI:
     def __init__(self, root):
@@ -22,7 +24,7 @@ class GrievanceManagementGUI:
 
     def load_case_data(self):
         """Load case records from case_data.json file, filtering for non-empty priority"""
-        with open("test.json", "r", encoding="utf-8") as f:
+        with open(f"{path}/data/test.json", "r", encoding="utf-8") as f:
             data = json.load(f)
 
         # Filter cases with non-empty priority
@@ -37,7 +39,7 @@ class GrievanceManagementGUI:
     def load_categories_data(self):
         """Load full categories data for keyword matching"""
         try:
-            with open("categories_data.json", "r") as f:
+            with open(f"{path}/data/categories_data.json", "r") as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading categories data: {e}")
@@ -46,7 +48,7 @@ class GrievanceManagementGUI:
     def load_departments(self):
         """Load departments from categories_data.json if available, otherwise use defaults"""
         try:
-            with open("categories_data.json", "r") as f:
+            with open(f"{path}/data/categories_data.json", "r") as f:
                 data = json.load(f)
 
                 # Since JSON is an array of category objects, extract names

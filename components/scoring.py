@@ -7,14 +7,14 @@ categories = []
 case_data = []
 alpha = 0.5
 
-with open("categories_data.json", "r") as file:
+with open("../data/categories_data.json", "r") as file:
     data = json.load(file)
 
     for i in data:
         categories.append(i)
 
 
-with open("case_data.json", "r") as file:
+with open("../data/case_data.json", "r") as file:
     data = json.load(file)
 
     for case in data:
