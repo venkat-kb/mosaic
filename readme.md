@@ -2,13 +2,13 @@
 
 ## Problem Statement: AI-Powered Citizen Grievance Redressal System
 
-*Empowering communities through efficient grievance management.*
+_Empowering communities through efficient grievance management._
 
 ![last-commit](https://img.shields.io/github/last-commit/venkat-kb/mosaic?style=flat&logo=git&logoColor=white&color=0080ff)
 ![repo-top-language](https://img.shields.io/github/languages/top/venkat-kb/mosaic?style=flat&color=0080ff)
 ![repo-language-count](https://img.shields.io/github/languages/count/venkat-kb/mosaic?style=flat&color=0080ff)
 
-*Built with the tools and technologies:*
+_Built with the tools and technologies:_
 
 ![JSON](https://img.shields.io/badge/JSON-000000.svg?style=flat&logo=JSON&logoColor=white)
 ![Typer](https://img.shields.io/badge/Typer-000000.svg?style=flat&logo=Typer&logoColor=white)
@@ -23,7 +23,6 @@
 ![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2.svg?style=flat&logo=Google-Gemini&logoColor=white)
 ![Pydantic](https://img.shields.io/badge/Pydantic-E92063.svg?style=flat&logo=Pydantic&logoColor=white)
 
-
 ---
 
 ## Table of Contents
@@ -32,6 +31,7 @@
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+
 ---
 
 ## Overview
@@ -51,9 +51,11 @@ This project aims to enhance the efficiency of grievance handling while improvin
 - **‼️ Prioritization:** Dynamically prioritizes the cases based on urgency, relevance and semantic weights of the concerned departments.
 
 ### Formula:
-score = α * Wi + (1 - α)(category accuracy) + thread_length
+
+score = α \* Wi + (1 - α)(category accuracy) + thread_length
 
 Where:
+
 - **α** - Reinforcement learning coefficient.
 - **Wi** - Semantic weight.
 - **category accuracy** - Relevance w.r.t the department.
@@ -81,6 +83,7 @@ Build Mosaic from the source and install dependencies:
 ```
 
 2. **Install all the requirements:**
+
 ```sh
 ❯ pip install -r requirements.txt
 ```
@@ -88,9 +91,11 @@ Build Mosaic from the source and install dependencies:
 3. **Make a .env file and put GEMINI_API_KEY inside it**
 
 4. **Run the file:**
+
 ```sh
 ❯ python main.py
 ```
 
 ---
+
 # Demo Video
