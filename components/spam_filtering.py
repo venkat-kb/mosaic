@@ -4,7 +4,7 @@ import datetime
 from typing import Dict, List, Tuple, Optional
 from collections import defaultdict
 
-from models import Grievance
+from .models import Grievance
 
 try:
     from langdetect import detect
