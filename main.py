@@ -1,7 +1,6 @@
-from input import GrievanceAgent
-from models import Grievance
-from spam_filtering import HelplineProcessor
-
+from components.input import GrievanceAgent
+from components.models import Grievance
+from components.spam_filtering import HelplineProcessor
 
 def main():
     try:

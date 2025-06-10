@@ -1,20 +1,22 @@
 import spacy
 import json
 
+path = os.getcwd()
+
 nlp = spacy.load("en_core_web_lg")
 
 categories = []
 case_data = []
 alpha = 0.5
 
-with open("../data/categories_data.json", "r") as file:
+with open(f"{path}/data/categories_data.json", "r") as file:
     data = json.load(file)
 
     for i in data:
         categories.append(i)
 
 
-with open("../data/case_data.json", "r") as file:
+with open(f"{path}/data/case_data.json", "r") as file:
     data = json.load(file)
 
     for case in data:
