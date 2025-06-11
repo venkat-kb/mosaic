@@ -361,7 +361,8 @@ class HelplineProcessor:
                 elif indicator in ["मजाक", "टेस्ट", "time pass"]:
                     spam_trigger_count += 1
 
-        if spam_trigger_count > 0 and len(text.split()) < 10:
+        # print(spam_trigger_count, len(text.split()))
+        if spam_trigger_count > 0 and len(text.split()) < 4:
             return True, "Non-grievance content"
 
         # Check for repeated phrases - FIXED: Better detection logic
@@ -400,6 +401,7 @@ class HelplineProcessor:
             "repair",
             "broken",
             "not working",
+            "burning",
             "समस्या",
             "परेशानी",
             "मदद",
@@ -539,6 +541,7 @@ class HelplineProcessor:
         is_spam, spam_reason = self.detect_spam(
             combined_text, grievance.caller_phone_no
         )
+        # print(spam_reason)
         if not is_spam and grievance.location:
             location_check = self.check_up_location(grievance.location)
             if not location_check and len(grievance.location) > 5:

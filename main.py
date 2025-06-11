@@ -1,7 +1,7 @@
 from components.input import GrievanceAgent
 from components.models import CaseRecord, Grievance
+from components.gui import gui
 
-# from components.scoring import classify_case_priority_flexible
 from components.spam_filtering import HelplineProcessor
 from subreddit.simitestllm import subredditting
 from components.scoring import scoring
@@ -15,15 +15,18 @@ def main():
         # print(grievance)
 
         grievance = Grievance(
-            caller_name="Aryan",
+            caller_name="Manasvi",
             caller_phone_no="9582707063",
-            location="Noida",
-            description="My house is burning down",
+            location="Meerut",
+            description="There are insects infesting my house, please help",
             date_time="2025-06-10 16:14:40",
         )
+        print("Done")
 
         processor = HelplineProcessor()
         result = processor.process_grievance_object(grievance)
+
+        print("Done")
 
         if result:
             print(result)
@@ -34,6 +37,7 @@ def main():
             scoring()
 
             # Deparment go go
+            gui()
 
             # Feedback loop
 

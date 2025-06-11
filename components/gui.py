@@ -446,11 +446,7 @@ class GrievanceManagementGUI:
         self.status_var.set(status_text)
 
 
-def main():
+def gui():
     root = tk.Tk()
     app = GrievanceManagementGUI(root)
     root.mainloop()
-
-
-if __name__ == "__main__":
-    main()

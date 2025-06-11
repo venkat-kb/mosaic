@@ -86,6 +86,8 @@ Build Mosaic from the source and install dependencies:
 
 ```sh
 ❯ pip install -r requirements.txt
+
+❯ python -m spacy download en_core_web_lg
 ```
 
 3. **Make a .env file and put GEMINI_API_KEY inside it**
