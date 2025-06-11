@@ -10,18 +10,16 @@ _Empowering communities through efficient grievance management._
 
 _Built with the tools and technologies:_
 
-![JSON](https://img.shields.io/badge/JSON-000000.svg?style=flat&logo=JSON&logoColor=white)
-![Typer](https://img.shields.io/badge/Typer-000000.svg?style=flat&logo=Typer&logoColor=white)
-![tqdm](https://img.shields.io/badge/tqdm-FFC107.svg?style=flat&logo=tqdm&logoColor=black)
-![Rich](https://img.shields.io/badge/Rich-FAE742.svg?style=flat&logo=Rich&logoColor=black)
-![SymPy](https://img.shields.io/badge/SymPy-3B5526.svg?style=flat&logo=SymPy&logoColor=white)
 ![Wasabi](https://img.shields.io/badge/Wasabi-01CD3E.svg?style=flat&logo=Wasabi&logoColor=white)
 ![spaCy](https://img.shields.io/badge/spaCy-09A3D5.svg?style=flat&logo=spaCy&logoColor=white)
 ![NumPy](https://img.shields.io/badge/NumPy-013243.svg?style=flat&logo=NumPy&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB.svg?style=flat&logo=Python&logoColor=white)
-![Excalidraw](https://img.shields.io/badge/Excalidraw-6965DB.svg?style=flat&logo=Excalidraw&logoColor=white)
 ![Google Gemini](https://img.shields.io/badge/Google%20Gemini-8E75B2.svg?style=flat&logo=Google-Gemini&logoColor=white)
 ![Pydantic](https://img.shields.io/badge/Pydantic-E92063.svg?style=flat&logo=Pydantic&logoColor=white)
+![PyAudio](https://img.shields.io/badge/PyAudio-FF6B6B.svg?style=flat&logo=python&logoColor=white)
+![SciKitLearn](https://img.shields.io/badge/Scikit--Learn-F7931E.svg?style=flat&logo=scikit-learn&logoColor=white)
+![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-FFD21E.svg?style=flat&logoColor=black)
+![WatsonX AI](https://img.shields.io/badge/WatsonX%20AI-052FAD.svg?style=flat&logo=IBM&logoColor=white)
 
 ---
 
