@@ -98,4 +98,6 @@ Build Mosaic from the source and install dependencies:
 
 ---
 
-# Demo Video
+# Demo Video & Presentaion Link
+
+[Click here](https://drive.google.com/drive/folders/1-pqAOwKpkR_uaBQ_icTFo4hb9Vz5Maeh?usp=sharing)
