@@ -11,18 +11,19 @@ class Grievance:
     location: str
     date_time: datetime
 
-
 @dataclass
 class CaseRecord:
-    case_no: str
-    case_category: str
-    case_detail: str
-    problem_start: str  # or datetime
-    location: str
-    priority: int
-    score: int  # specify types if needed e.g., Dict[str, int]
-    thread: List[Grievance] = field(default_factory=list)
-
+    case_no: str | None
+    case_category: str | None
+    date: datetime
+    detail: str | None
+    location: str | None
+    priority: str | None
+    score: int | None
+    status: str | None
+    caller: str | None
+    phone_no: str | None
+    sub_reddit_id: str | None
 
 class Category:
     name: str

@@ -21,6 +21,7 @@ import spacy
 from components.models import CaseRecord
 import os
 
+from db.supabase import create_supabase_client
 # path = os.getcwd()
 
 # ------------- CONFIGURATION ----------------
@@ -94,19 +95,20 @@ def get_sentiment(text):
         return "Neutral"
 
 
-def subredditting(g):
+def subredditting(g: CaseRecord):
     path = os.getcwd()
     # ---------- Load and Parse ----------------
-    with open(f"{path}/data/test.json", "r", encoding="utf-8") as f:
-        existing_cases = json.load(f)
+    # with open(f"{path}/data/test.json", "r", encoding="utf-8") as f:
+    #     existing_cases = json.load(f)
     # with open(RAW_INPUT, 'r', encoding='utf-8') as f:
     #     grievances = json.load(f)
-
+    supabase = create_supabase_client()
+    existing_cases = supabase.table("Complaint").select("*").eq('case_no', 'sub_reddit_id').execute()
+    print(existing_cases.data)
     # for g in grievances:
-    g.date_time = datetime.fromisoformat(g.date_time)
 
     # descriptions = [g['description'] for g in grievances]
-    descriptions = g.description
+    descriptions = g.detail
 
     # TF-IDF similarity
     # vectorizer = TfidfVectorizer()
@@ -121,30 +123,30 @@ def subredditting(g):
     print("Embeddings complete.")
 
     # ---------- Grouping Threads ---------------
-    visited = [False] * len(existing_cases)
-    threads = []
+    visited = [False] * len(existing_cases.data)
+    # threads = []
     best_case_idx = -1
     best_score = -1
 
-    for idx, case in enumerate(existing_cases):
+    for idx, case in enumerate(existing_cases.data):
         if visited[idx]:
             continue
         if case["location"].lower() != g.location.lower():
             continue
         try:
-            case_date = datetime.fromisoformat(case["problem_start"])
+            case_date = datetime.fromisoformat(case["date"])
         except ValueError:
-            case_date = datetime.strptime(case["problem_start"], "%Y-%m-%d %H:%M:%S")
+            case_date = datetime.strptime(case["date"], "%Y-%m-%d %H:%M:%S")
 
-        if abs((g.date_time - case_date).days) > DATE_WINDOW.days:
+        if abs((g.date - case_date).days) > DATE_WINDOW.days:
             continue
 
         tfidf = TfidfVectorizer()
-        texts = [case["case_detail"], descriptions]
+        texts = [case["detail"], descriptions]
         tfidf_matrix = tfidf.fit_transform(texts)
         tfidf_score = cosine_similarity(tfidf_matrix)[0][1]
 
-        case_embed = get_local_embedding(case["case_detail"])
+        case_embed = get_local_embedding(case["detail"])
         llm_score = cosine_sim(embeddings, case_embed)
 
         final_score = (TFIDF_WEIGHT * tfidf_score + LLM_WEIGHT * llm_score) / (
@@ -155,30 +157,57 @@ def subredditting(g):
             best_score = final_score
             best_case_idx = idx
 
-    new_thread_entry = {
-        "caller_name": g.caller_name,
-        "caller_phone_no": g.caller_phone_no,
-        "description": g.description,
-        "location": g.location,
-        "date_time": g.date_time.isoformat(),
-    }
+
     if best_case_idx != -1:
-        existing_cases[best_case_idx]["thread"].append(new_thread_entry)
-    else:
-        case = {
-            "case_no": str(uuid.uuid4()),
-            "case_category": "",
-            "case_detail": descriptions,
-            "problem_start": g.date_time.isoformat(),
-            "location": g.location.lower(),
-            "priority": "",
-            "score": 0,
+        new_thread_entry = supabase.table("Complaint").insert({
+            "case_no": g.case_no,
+            "case_category": existing_cases.data[best_case_idx]["case_category"],
+            "date": g.date.isoformat(),
+            "detail": g.detail,
+            "location": g.location,
+            "priority": None,
+            "score": None,
             "status": "open",
-            "thread": [new_thread_entry],
-        }
-        existing_cases.append(case)
-    with open(f"{path}/data/test.json", "w") as f:
-        json.dump(existing_cases, f)
+            "caller": g.caller,
+            "phone_no": g.phone_no,
+            "sub_reddit_id": existing_cases.data[best_case_idx]["case_no"],
+        }).execute()
+        print(new_thread_entry)
+
+        # supabase insert entry in table
+    else:
+        # case = {
+        #     "case_no": str(uuid.uuid4()),
+        #     "case_category": "",
+        #     "case_detail": descriptions,
+        #     "problem_start": g.date_time.isoformat(),
+        #     "location": g.location.lower(),
+        #     "priority": "",
+        #     "score": 0,
+        #     "status": "open",
+        #     "thread": [new_thread_entry],
+        # }
+        # existing_cases.append(case)
+
+        new_thread_entry = supabase.table("Complaint").insert({
+            "case_no": g.case_no,
+            "case_category": None,
+            "date": g.date.isoformat(),
+            "detail": g.detail,
+            "location": g.location,
+            "priority": None,
+            "score": None,
+            "status": "open",
+            "caller": g.caller,
+            "phone_no": g.phone_no,
+            "sub_reddit_id": g.case_no,
+        }).execute()
+        print(new_thread_entry)
+
+        # insert entry in supabase table
+
+    # with open(f"{path}/data/test.json", "w") as f:
+    #     json.dump(existing_cases, f)
 
         # base = grievances[i]
         # base_embed = embeddings[i]

@@ -3,6 +3,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import os
+from db.supabase import create_supabase_client
+from collections import defaultdict
 
 
 def scoring():
@@ -10,7 +12,7 @@ def scoring():
     categories = []
     case_data = []
     alpha = 0.5
-
+    supabase = create_supabase_client()
     # Initialize TF-IDF vectorizer
     vectorizer = TfidfVectorizer(
         stop_words="english",
@@ -24,20 +26,30 @@ def scoring():
         for i in data:
             categories.append(i)
 
-    with open(f"{path}/data/test.json", "r") as file:
-        data = json.load(file)
-        for case in data:
-            case_data.append(case)
+    # with open(f"{path}/data/test.json", "r") as file:
+    #     data = json.load(file)
+    #     for case in data:
+    #         case_data.append(case)
+    case_data = supabase.table("Complaint").select("*").execute().data
+    complaints = supabase.table("Complaint").select("*").neq('case_no', 'sub_reddit_id').execute().data
 
-    max_thread_len = max(len(case["thread"]) for case in case_data)
+    group_counts = defaultdict(int)
+    for complaint in complaints:
+        group_counts[complaint["sub_reddit_id"]] += 1
 
+    if (group_counts):
+        maxcount = max(group_counts.values())
+
+    max_thread_len = maxcount
+
+    
     # Prepare all text data for vectorization
     all_texts = []
     case_descriptions = []
 
     # Collect case descriptions
     for case in case_data:
-        case_description = case["case_detail"]
+        case_description = case["detail"]
         case_descriptions.append(case_description)
         all_texts.append(case_description)
 
@@ -59,7 +71,7 @@ def scoring():
     # Process each case
     for i, case in enumerate(case_data):
         case_vector = case_vectors[i]
-
+        caseoh = case["case_no"]
         max_score = -1  # Initialize to -1 to ensure at least one category is selected
         selected_category = None
         total_weights = 0
@@ -102,17 +114,25 @@ def scoring():
             selected_category = categories[0]
             max_score = 0
 
-        case["case_category"] = selected_category
+        supabase.table("Complaint").update({"case_category": selected_category}).eq("case_no", caseoh).execute()
+
+        # case["case_category"] = selected_category
 
         category_weight = selected_category["semantic_weight"] / total_weights
+
+        len_case = 1
+
+        for c in complaints:
+            if c["sub_reddit_id"] == case["case_no"]:
+                len_case += 1
 
         final_score = (
             (alpha * category_weight)
             + ((1 - alpha) * max_score)
-            + (len(case["thread"]) / max_thread_len)
-        )
-
-        case["score"] = final_score
+            + (len_case) / max_thread_len)
+        
+        supabase.table("Complaint").update({"score": final_score}).eq("case_no", caseoh).execute()
+        # case["score"] = final_score
 
         priority = ""
 
@@ -123,7 +143,8 @@ def scoring():
         else:
             priority = "high"
 
-        case["priority"] = priority
+        supabase.table("Complaint").update({"priority": priority}).eq("case_no", caseoh).execute()
+        # case["priority"] = priority
 
-    with open(f"{path}/data/test.json", "w") as f:
-        json.dump(case_data, f)
+    # with open(f"{path}/data/test.json", "w") as f:
+    #     json.dump(case_data, f)
